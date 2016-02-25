@@ -57,20 +57,47 @@ int main(int argc, char *argv[]) {
 	out = new unsigned char[roundSize];
 
 	in = (unsigned char*)bytes.data();
-	memset(in + fileSize, 0, roundSize - fileSize);
+	
+	
 
 	mbedtls_aes_init(&context);
 
 	
 	//encrypt
-	mbedtls_aes_setkey_enc(&context, key, 128);
 
-	mbedtls_aes_crypt_cbc(&context, MBEDTLS_AES_ENCRYPT, roundSize, iv, in, out);
+	if (mode == MODE_ENCRYPT) {
+		//padding
+		size_t diff = roundSize - fileSize;
+		memset(in + fileSize, diff, diff);
+		
+		mbedtls_aes_setkey_enc(&context, key, 128);
 
-	//output
-	ofstream output(fileName + encSuffix, ios::binary);
-	output.write((char*)out, roundSize);
-	output.close();
+		mbedtls_aes_crypt_cbc(&context, MBEDTLS_AES_ENCRYPT, roundSize, iv, in, out);
 
+		//output
+		ofstream output(fileName + encSuffix, ios::binary);
+		output.write((char*)out, roundSize);
+		output.close();
+	}
+
+	if (mode == MODE_DECRYPT) {
+		mbedtls_aes_setkey_dec(&context, key, 128);
+		mbedtls_aes_crypt_cbc(&context, MBEDTLS_AES_DECRYPT, roundSize, iv, in, out);
+
+		size_t outputSize;
+		//remove padding
+		//doesnt work if last two chars are same
+		if (out[roundSize - 1] == 1) {
+			outputSize = roundSize - 1;
+		}
+		else if (out[roundSize - 1] == out[roundSize - 2]) {
+			outputSize = roundSize - out[roundSize - 1];
+		}
+
+		//output
+		ofstream output(fileName + decSuffix, ios::binary);
+		output.write((char*)out, outputSize);
+		output.close();
+	}
 	return 0;
 }
