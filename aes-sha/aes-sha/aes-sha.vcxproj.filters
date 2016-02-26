@@ -21,5 +21,8 @@
     <ClCompile Include="aes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sha512.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

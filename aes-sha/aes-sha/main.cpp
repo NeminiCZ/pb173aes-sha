@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include "mbedtls/aes.h"
-
+#include "mbedtls/sha512.h"
 using namespace std;
 
 #define MODE_ENCRYPT 0
@@ -31,9 +31,11 @@ int main(int argc, char *argv[]) {
 	unsigned char iv[16] = { 0x0F, 0x02, 0x08, 0x04, 0x03, 0x08, 0x06, 0x0F, 0x0E, 0x07, 0x05, 0x07, 0x0D, 0x05, 0x07, 0x0D };
 	unsigned char *in;
 	unsigned char *out;
+	unsigned char hash[64];
 	string encSuffix = ".enc";
 	string decSuffix = ".dec";
-	mbedtls_aes_context context;
+	mbedtls_aes_context aesContext;
+	mbedtls_sha512_context shaContext;
 
 	//reading input file
 	ifstream inputFile(fileName, ios_base::binary);
@@ -60,8 +62,8 @@ int main(int argc, char *argv[]) {
 	
 	
 
-	mbedtls_aes_init(&context);
-
+	mbedtls_aes_init(&aesContext);
+	mbedtls_sha512_init(&shaContext);
 	
 	//encrypt
 
@@ -69,29 +71,37 @@ int main(int argc, char *argv[]) {
 		//padding
 		size_t diff = roundSize - fileSize;
 		memset(in + fileSize, diff, diff);
+		//hash
+		mbedtls_sha512(in, fileSize, hash, 0);
 		
-		mbedtls_aes_setkey_enc(&context, key, 128);
+		mbedtls_aes_setkey_enc(&aesContext, key, 128);
 
-		mbedtls_aes_crypt_cbc(&context, MBEDTLS_AES_ENCRYPT, roundSize, iv, in, out);
+		mbedtls_aes_crypt_cbc(&aesContext, MBEDTLS_AES_ENCRYPT, roundSize, iv, in, out);
 
 		//output
 		ofstream output(fileName + encSuffix, ios::binary);
+		output.write((char*)hash, 64);
 		output.write((char*)out, roundSize);
 		output.close();
 	}
 
 	if (mode == MODE_DECRYPT) {
-		mbedtls_aes_setkey_dec(&context, key, 128);
-		mbedtls_aes_crypt_cbc(&context, MBEDTLS_AES_DECRYPT, roundSize, iv, in, out);
+		memcpy(hash, in, 64);
+		roundSize -= 64;
+		mbedtls_aes_setkey_dec(&aesContext, key, 128);
+		mbedtls_aes_crypt_cbc(&aesContext, MBEDTLS_AES_DECRYPT, roundSize, iv, in+64, out);
 
 		size_t outputSize;
 		//remove padding
-		//doesnt work if last two chars are same
-		if (out[roundSize - 1] == 1) {
-			outputSize = roundSize - 1;
-		}
-		else if (out[roundSize - 1] == out[roundSize - 2]) {
+		if (out[roundSize - 1] < 16) {
 			outputSize = roundSize - out[roundSize - 1];
+		}
+
+		//compare hash
+		unsigned char decryptedHash[64];
+		mbedtls_sha512(out, outputSize, decryptedHash, 0);
+		if (memcmp(hash, decryptedHash, 64)) {
+			cerr << "Hash are not equal.";
 		}
 
 		//output
