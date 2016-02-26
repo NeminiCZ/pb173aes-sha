@@ -80,28 +80,29 @@ int main(int argc, char *argv[]) {
 
 		//output
 		ofstream output(fileName + encSuffix, ios::binary);
-		output.write((char*)hash, 64);
+		output.write((char*)hash, 64); //hash is added at begining of file
 		output.write((char*)out, roundSize);
 		output.close();
 	}
 
-	if (mode == MODE_DECRYPT) {
-		memcpy(hash, in, 64);
-		roundSize -= 64;
-		mbedtls_aes_setkey_dec(&aesContext, key, 128);
-		mbedtls_aes_crypt_cbc(&aesContext, MBEDTLS_AES_DECRYPT, roundSize, iv, in+64, out);
+	//decrypt
 
-		size_t outputSize;
+	if (mode == MODE_DECRYPT) {
+		memcpy(hash, in, 64); //fetch hash from beg of file
+		size_t outputSize = roundSize - 64;
+		mbedtls_aes_setkey_dec(&aesContext, key, 128);
+		mbedtls_aes_crypt_cbc(&aesContext, MBEDTLS_AES_DECRYPT, outputSize, iv, in + 64, out);
+
 		//remove padding
-		if (out[roundSize - 1] < 16) {
-			outputSize = roundSize - out[roundSize - 1];
+		if (out[outputSize - 1] < 16) {
+			outputSize = outputSize - out[outputSize - 1];
 		}
 
 		//compare hash
 		unsigned char decryptedHash[64];
 		mbedtls_sha512(out, outputSize, decryptedHash, 0);
 		if (memcmp(hash, decryptedHash, 64)) {
-			cerr << "Hash are not equal.";
+			cerr << "Hashes are not equal, file was corrupted.";
 		}
 
 		//output
@@ -109,5 +110,12 @@ int main(int argc, char *argv[]) {
 		output.write((char*)out, outputSize);
 		output.close();
 	}
+
+	//clean
+
+	memset(in, 0, roundSize);
+	memset(key, 0, 16);
+	memset(iv, 0, 16);
+	
 	return 0;
 }
