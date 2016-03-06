@@ -1,12 +1,14 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "mbedtls/aes.h"
-#include "mbedtls/sha512.h"
+#include "cryptFun.h"
+
 using namespace std;
 
 #define MODE_ENCRYPT 0
 #define MODE_DECRYPT 1
+#define ENC_SUFFIX ".enc"
+#define DEC_SUFFIX ".dec"
 
 int main(int argc, char *argv[]) {
 
@@ -15,9 +17,10 @@ int main(int argc, char *argv[]) {
 		cerr << "mode: 0 enc, 1 dec" << endl;
 		return 1;
 	}
-	int mode;
 
+	int mode;
 	mode = argv[1][0] - '0';
+	
 	if (mode < 0 || mode > 1) {
 		cerr << "Invalid mode" << endl;
 		cerr << endl << "mode: 0 enc, 1 dec" << endl;
@@ -26,17 +29,33 @@ int main(int argc, char *argv[]) {
 
 	string fileName = argv[2];
 	size_t fileSize;
-	size_t roundSize;
+	size_t outputFileSize;
 	unsigned char key[16] = { 0x09, 0x0F, 0x05, 0x0C, 0x0A, 0x0B, 0x0B, 0x0C, 0x0D, 0x0D, 0x0E, 0x03, 0x04, 0x05, 0x07, 0x0D };
 	unsigned char iv[16] = { 0x0F, 0x02, 0x08, 0x04, 0x03, 0x08, 0x06, 0x0F, 0x0E, 0x07, 0x05, 0x07, 0x0D, 0x05, 0x07, 0x0D };
-	unsigned char *in;
-	unsigned char *out;
-	unsigned char hash[64];
-	string encSuffix = ".enc";
-	string decSuffix = ".dec";
-	mbedtls_aes_context aesContext;
-	mbedtls_sha512_context shaContext;
+	unsigned char *in = NULL;
+	unsigned char *out = NULL;
+	
+	cryptFun crypto(key, iv);
 
+	if (crypto.readFile(fileName, in, fileSize)) {
+		cerr << "Unable to open input file.";
+		return 1;
+	}
+
+	if (mode == MODE_ENCRYPT) {
+		crypto.encryptAndHash(in, fileSize, out, outputFileSize);
+		crypto.writeFile(fileName + ENC_SUFFIX, out, outputFileSize);
+	}
+	if (mode == MODE_DECRYPT) {
+		if (crypto.decryptAndVerify(in, fileSize, out, outputFileSize)) {
+			cerr << "Verification of hash failed.";
+			return 1;
+		}
+		crypto.writeFile(fileName + DEC_SUFFIX, out, outputFileSize);
+	}
+	delete[] in;
+	delete[] out;
+	/*
 	//reading input file
 	ifstream inputFile(fileName, ios_base::binary);
 
@@ -116,6 +135,6 @@ int main(int argc, char *argv[]) {
 	memset(in, 0, roundSize);
 	memset(key, 0, 16);
 	memset(iv, 0, 16);
-	
+	*/
 	return 0;
 }
