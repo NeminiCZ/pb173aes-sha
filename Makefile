@@ -6,10 +6,12 @@ CXXFLAGS=-Wall -Wextra
 SOURCES_GEN=aes-sha/aes-sha/cryptFun.cpp
 # Source and object lists for main program
 SOURCES_MAIN=$(SOURCES_GEN) aes-sha/aes-sha/main.cpp
-OBJECTS_MAIN=$(SOURCES_MAIN:.cpp=.o)
+OBJECTS_C_MAIN=$(SOURCES_TEST:.c=.o)
+OBJECTS_MAIN=$(OBJECTS_C_MAIN:.cpp=.o)
 # Source and object lists for testing binary
 SOURCES_TEST=$(SOURCES_GEN) aes-sha/aes-sha/testing.cpp
-OBJECTS_TEST=$(SOURCES_TEST:.cpp=.o)
+OBJECTS_C_TEST=$(SOURCES_TEST:.c=.o)
+OBJECTS_TEST=$(OBJECTS_C_TEST:.cpp=.o)
 
 # Most frequently used automatic variables:
 # $@ (name of the target rule)
