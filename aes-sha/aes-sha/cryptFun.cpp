@@ -17,7 +17,7 @@ int cryptFun::fixPadding(unsigned char* fileContents, size_t fileSize) {
 
 int cryptFun::readFile(string fileName, unsigned char*& fileContents, size_t& fileSize) {
 
-	ifstream inputFile(fileName, ios_base::binary);
+	ifstream inputFile(fileName.c_str(), ios_base::binary);
 
 	if (!inputFile.is_open()) {
 		return 1;
@@ -35,7 +35,7 @@ int cryptFun::readFile(string fileName, unsigned char*& fileContents, size_t& fi
 
 void cryptFun::writeFile(string fileName, unsigned char* fileContents, size_t fileSize) {
 
-	ofstream output(fileName, ios::binary);
+	ofstream output(fileName.c_str(), ios::binary);
 	output.write((char*)fileContents, fileSize);
 	output.close();
 

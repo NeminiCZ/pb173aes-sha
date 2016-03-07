@@ -34,4 +34,4 @@ private:
 	int fixPadding(unsigned char* fileContents, size_t fileSize);
 };
 
-#endif CRYPTFUN_H
+#endif
