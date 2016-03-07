@@ -9,12 +9,18 @@ private:
 	mbedtls_aes_context aesContext;
 	mbedtls_sha512_context shaContext;
 public:
-	cryptFun(unsigned char key[16], unsigned char iv[16])
-	: key(key), iv(iv)
+	cryptFun(unsigned char _key[16], unsigned char _iv[16])
+		: key(new unsigned char[16]), iv(new unsigned char[16])
 	{
+		memcpy(key, _key, 16);
+		memcpy(iv, _iv, 16);
 		mbedtls_aes_init(&aesContext);
 		mbedtls_sha512_init(&shaContext);	
 	};
+	~cryptFun() {
+		delete[] key;
+		delete[] iv;
+	}
 
 	int readFile(std::string fileName, unsigned char*& fileContents, size_t& fileSize);
 	void writeFile(std::string fileName, unsigned char* fileContents, size_t fileSize);

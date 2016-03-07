@@ -45,7 +45,7 @@ int cryptFun::encryptAndHash(unsigned char* input, size_t inputSize,unsigned cha
 	int padding = fixPadding(input, inputSize);
 	size_t inputSizeWithPadding = inputSize + padding;
 	//hash
-	mbedtls_sha512(input, inputSizeWithPadding, hash, 0);
+	mbedtls_sha512(input, inputSize, hash, 0);
 
 	output = new unsigned char[inputSizeWithPadding + 64];
 	memcpy(output, hash, 64);
