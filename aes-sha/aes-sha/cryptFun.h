@@ -1,6 +1,10 @@
+#ifndef CRYPTFUN_H
+#define CRYPTFUN_H
+
 #include "mbedtls/aes.h"
 #include "mbedtls/sha512.h"
 #include <string>
+#include <cstring>
 
 class cryptFun {
 private:
@@ -12,8 +16,8 @@ public:
 	cryptFun(unsigned char _key[16], unsigned char _iv[16])
 		: key(new unsigned char[16]), iv(new unsigned char[16])
 	{
-		memcpy(key, _key, 16);
-		memcpy(iv, _iv, 16);
+		std::memcpy(key, _key, 16);
+		std::memcpy(iv, _iv, 16);
 		mbedtls_aes_init(&aesContext);
 		mbedtls_sha512_init(&shaContext);	
 	};
@@ -29,3 +33,5 @@ public:
 private:
 	int fixPadding(unsigned char* fileContents, size_t fileSize);
 };
+
+#endif CRYPTFUN_H
