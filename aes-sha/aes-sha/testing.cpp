@@ -71,7 +71,7 @@ TEST_CASE("Encryption vector") {
 		CHECK(crypto.encryptAndHash(vanillaFileContents, vanillaFileSize, encryptOutput, encryptOutputSize) == 0);
 		CHECK(encLoadedFileSize == encryptOutputSize);
 		CHECK(memcmp(encryptOutput, encLoadedFileContents, encryptOutputSize) == 0);
-		CHECK("corrupted file", memcmp(encryptOutput, corruptedFileContents, encryptOutputSize) != 0);
+		CHECK(memcmp(encryptOutput, corruptedFileContents, encryptOutputSize) != 0);
 	}
 	delete[] vanillaFileContents;
 	delete[] encryptOutput;
