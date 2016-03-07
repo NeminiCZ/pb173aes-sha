@@ -2,8 +2,12 @@
 # Variables CC and CXX are automatically set on all UNIX systems.
 
 # Variable settings
+CFLAGS=-Wall -Wextra 
 CXXFLAGS=-Wall -Wextra 
-SOURCES_GEN=aes-sha/aes-sha/cryptFun.cpp
+SOURCES_ALL=$(wildcard aes-sha/aes-sha/*.c) $(wildcard aes-sha/aes-sha/*.cpp)
+SOURCES_GEN=$(filter-out aes-sha/aes-sha/main.cpp aes-sha/aes-sha/testing.cpp,$(SOURCES_ALL))
+
+
 # Source and object lists for main program
 SOURCES_MAIN=$(SOURCES_GEN) aes-sha/aes-sha/main.cpp
 OBJECTS_C_MAIN=$(SOURCES_TEST:.c=.o)
