@@ -24,7 +24,7 @@
     <ClCompile Include="aes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="testing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
