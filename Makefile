@@ -10,7 +10,7 @@ SOURCES_GEN=$(filter-out aes-sha/aes-sha/main.cpp aes-sha/aes-sha/testing.cpp,$(
 
 # Source and object lists for main program
 SOURCES_MAIN=$(SOURCES_GEN) aes-sha/aes-sha/main.cpp
-OBJECTS_C_MAIN=$(SOURCES_TEST:.c=.o)
+OBJECTS_C_MAIN=$(SOURCES_MAIN:.c=.o)
 OBJECTS_MAIN=$(OBJECTS_C_MAIN:.cpp=.o)
 # Source and object lists for testing binary
 SOURCES_TEST=$(SOURCES_GEN) aes-sha/aes-sha/testing.cpp
