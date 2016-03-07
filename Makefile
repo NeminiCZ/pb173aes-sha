@@ -47,5 +47,8 @@ main-test: $(OBJECTS_TEST)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 clean:
 	rm -fr $(OBJECTS_MAIN) $(OBJECTS_TEST)
